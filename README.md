@@ -1,4 +1,4 @@
-# Flipped activities for COMP0034 Week 9
+# Week 10 activities
 
 ## Set-up
 
