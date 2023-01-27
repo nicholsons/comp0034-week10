@@ -1,0 +1,16 @@
+{% extends 'layout.html' %}
+{% set title = 'Event' %}
+{# TODO: change the title so it is the name of the event #}
+{% block content %}
+
+<h1>{{ event['location'] }} {{ event['year'] }} ({{ event['type'] }}</h1>
+
+<ul>
+    {% for key, value in event %}
+    <li>{{ key }}: {{ value }}</li>
+    {% endfor %}
+    <li>
+</ul>
+
+
+{% endblock %}

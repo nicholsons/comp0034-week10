@@ -1,7 +1,9 @@
+import multiprocessing
 import pytest
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver import Chrome
-from iris_app import create_app
+from paralympic_app import create_app
+from paralympic_app.models import Region
 
 
 @pytest.fixture(scope="session")
@@ -14,7 +16,6 @@ def app():
             "SQLALCHEMY_ECHO": True,
             "WTF_CSRF_ENABLED": False,
             "SERVER_NAME": "127.0.0.1:5000",
-            "PRESERVE_CONTEXT_ON_EXCEPTION": False,
         }
     )
     yield app
@@ -22,7 +23,7 @@ def app():
 
 @pytest.fixture(scope="function")
 def test_client(app):
-    """Create a Flask test test_client"""
+    """Create a Flask test client"""
     with app.test_client() as test_client:
         with app.app_context():
             yield test_client
@@ -44,15 +45,31 @@ def chrome_driver():
 
 
 @pytest.fixture(scope="module")
-def form_data():
-    """Data for a prediction.
-
-    Uses: 7.0,3.2,4.7,1.4,versicolor
+def run_app(app, init_multiprocessing):
     """
-    form_data = {
-        "sepal_length": 7.0,
-        "sepal_width": 3.2,
-        "petal_length": 4.7,
-        "petal_width": 1.4,
+    Fixture to run the Flask app for Selenium tests
+    """
+    process = multiprocessing.Process(target=app.run, args=())
+    process.start()
+    yield process
+    process.terminate()
+
+
+@pytest.fixture(scope="module")
+def region_json():
+    """Creates a new region JSON for tests"""
+    reg_json = {
+        "NOC": "NEW",
+        "region": "New Region",
+        "notes": "Some notes about the new region",
     }
-    yield form_data
+    return reg_json
+
+
+@pytest.fixture(scope="module")
+def region():
+    """Creates a new region object for tests"""
+    new_region = Region(
+        NOC="NEW", region="New Region", notes="Some notes about the new region"
+    )
+    return new_region
