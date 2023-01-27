@@ -1,4 +1,4 @@
-# Flipped activities for COMP0034 Week 9
+# Week 10 activities
 
 ## Set-up
 
@@ -8,6 +8,10 @@ Install the packages from requirements.txt.
 
 If you are creating the machine learning app then you can edit requirements.txt to uncomment scikit-learn and pandas.
 
-## Week 9 activities
+## Week 10 activities
 
 The activities are accessed from [activities/activities.md](/activities/activities.md)
+
+## Week 9 solutions
+
+The activities are accessed from [tests](/tests)
