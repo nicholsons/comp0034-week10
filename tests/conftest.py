@@ -4,11 +4,13 @@ import multiprocessing
 
 @pytest.fixture(scope="session")
 def init_multiprocessing():
-    """Sets multiprocessing to fork once per session
+    """Sets multiprocessing to fork once per session.
+
+    If already set once then on subsequent calls a runtime error will be raised which should be ignored.
 
     Needed in Python 3.8 and later
     """
-    # get the current start method
-    method = multiprocessing.get_start_method()
-    if method != "fork":
+    try:
         multiprocessing.set_start_method("fork")
+    except RuntimeError:
+        pass

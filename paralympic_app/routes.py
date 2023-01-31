@@ -1,3 +1,4 @@
+import json
 from flask import (
     render_template,
     current_app as app,
@@ -39,8 +40,8 @@ def index():
 @app.route("/display_event/<event_id>")
 def display_event(event_id):
     """Returns the event detail page"""
-    event = get_event(event_id)
-    return render_template("event.html", event=event)
+    ev = get_event(event_id)
+    return render_template("event.html", event=ev)
 
 
 @app.get("/noc")

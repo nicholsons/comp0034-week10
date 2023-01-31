@@ -8,5 +8,5 @@ selenium
 numpy
 requests
 pytest-cov
-# scikit-learn
-# pandas
+scikit-learn
+pandas

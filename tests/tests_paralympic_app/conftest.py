@@ -44,7 +44,7 @@ def chrome_driver():
     driver.quit()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def run_app(app, init_multiprocessing):
     """
     Fixture to run the Flask app for Selenium tests
