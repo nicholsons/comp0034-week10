@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name="paralympic_app",
+    name="comp0034-week10",
     packages=["paralympic_app", "iris_app"],
     include_package_data=True,
     install_requires=[
@@ -13,19 +13,6 @@ setup(
         "marshmallow-sqlalchemy",
         "pandas",
         "requests",
+        "sklearn",
     ],
 )
-
-# Use the following version for the Iris ML app
-"""
-setup(
-    name="iris_app",
-    packages=["iris_app"],
-    include_package_data=True,
-    install_requires=[
-        "flask",
-        "pandas",
-        "sklearn"
-    ],
-)
-"""

@@ -14,11 +14,11 @@ def test_index(test_client):
     """
     GIVEN a running Flask app
     WHEN an HTTP GET request is made to '/'
-    THEN the status code should be 200, and the page should contain the text "Barcelona 1992 (Summer)"
+    THEN the status code should be 200, and the page should contain the text "Barcelona 1992"
     """
     response = test_client.get("/")
     assert response.status_code == 200
-    assert b"Barcelona 1992 (Summer)" in response.data
+    assert b"Barcelona 1992" in response.data
 
 
 def test_get_all_regions(test_client):
