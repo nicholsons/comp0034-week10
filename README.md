@@ -1,5 +1,7 @@
 # Week 10 activities
 
+> DO NOT USE YET - INCOMPLETE
+
 ## Set-up
 
 You will need to a Python environment e.g create and activate a venv.
