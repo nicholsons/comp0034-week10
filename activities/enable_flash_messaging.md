@@ -7,53 +7,60 @@ using [message flashing](https://flask.palletsprojects.com/en/1.1.x/quickstart/#
 
 This can be useful for highlighting errors or giving other feedback to the user.
 
+This activity adds flash messaging to the Iris app.
+
 ### Display flashed messages
 
-Since we may want to do this for any page in our application let's enable this in the `layout.html` template.
+Since you may want to do this for any page in an application, you may prefer to enable this in the base template.
 
-Add the following to the base jinja template between the navbar and the main content:
+Add the following to the `layout.html` jinja template for the Iris app between the navbar and the main content:
 
 ```jinja2
-{# Displays flashed messages on a page #}
-{% with messages = get_flashed_messages() %}
+    <!-- Flashed messages see https://flask.palletsprojects.com/en/2.2.x/patterns/flashing/ -->
+    {% with messages = get_flashed_messages() %}
     {% if messages %}
-        <ul>
+    <ul class="alert alert-warning">
         {% for message in messages %}
-            <li>{{ message }}</li>
+        <li>{{ message }}</li>
         {% endfor %}
-        </ul>
+    </ul>
     {% endif %}
-{% endwith %}
+    {% endwith %}
 ```
 
-Change the auth.signup route to flash a message and then redirect to the main.index to see this in action:
+Change the `register` route so that rather than printing `text = f"<p>You are registered! {repr(new_user)}</p>"`, instead you flash a message and then redirect to the `index`:
 
 ```python
-from flask import Blueprint, render_template, flash, redirect, url_for
+from flask import flash, redirect, url_for
 
-from my_flask_app.auth.forms import SignupForm
-
-auth_bp = Blueprint('auth', __name__)
-
-
-@auth_bp.route('/signup', methods=['GET', 'POST'])
-def signup():
-    form = SignupForm()
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    form = UserForm()
     if form.validate_on_submit():
-        name = form.first_name.data
-        flash(f"Hello, {name}. You are signed up.")
-        return redirect(url_for('main.index'))
-    return render_template('signup.html', title='Sign Up', form=form)
+        email = request.form.get("email")
+        password = request.form.get("password")
+        new_user = User(email=email, password=password)
+        db.session.add(new_user)
+        db.session.commit()
+        # Remove two lines and replace with Flash message code
+        # text = f"<p>You are registered! {repr(new_user)}</p>"
+        # return text
+        text = f"You are registered! {repr(new_user)}"
+        flash(text)
+        return redirect(url_for("index"))
 ```
+
+To test it, run the app `python -m flask --app 'iris_app:create_app()' --debug run`, click on Register in the navbar then compete and submit the form.
+
+![homepage screenshot with flash message](/activities/flash-screenshot.png)
 
 ## Using the form object's errors attribute
 
-Currently, the signup form returns if it doesn't pass the validation, however if yuou didn't use the `_formhelpers.html`
-then you probably are not giving any feedback to the user about the errors.
+Currently, the registration form returns if it doesn't pass the validation, however if you don't use the `_formhelpers.html` Jinja macro then you probably are not giving any feedback to the user about the errors.
 
-You can access the validation errors of our form object using `form.errors`.
+You can access the validation errors of a Flask-WTF form object using `form.errors`.
 
-Try the following in signup.html.
+An example of adding errors:
 
 ```jinja2
 {# Display the form validation errors #}
@@ -64,11 +71,8 @@ Try the following in signup.html.
     {% endfor %}
 ```
 
-## Challenge
+This has already been added to the code in [register.html](/iris_app/templates/register.html), have a look to see the syntax.
 
-Improve the formatting by adding the error messages next to the input box on the form rather than a list at the top of
-the page.
+Note: The Jinja2 template macro `_formhelpers.html` is used to generate forms automatically from fields and add styling. Read the [documentation here](https://flask.palletsprojects.com/en/2.0.x/patterns/wtforms/#forms-in-templates) which contains the necessary code.
 
-Consider writing a Jinja2 template macro `_formhelpers.html` to generate forms and add styling. Read
-the [documentation here](https://flask.palletsprojects.com/en/2.0.x/patterns/wtforms/#forms-in-templates) which contains
-the necessary code.
+You could try and apply this to the register.html code! (not included in the completed code example).
