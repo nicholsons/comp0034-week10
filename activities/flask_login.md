@@ -85,7 +85,6 @@ from flask_login import UserMixin
 class User(UserMixin, db.Model):
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.Text)
     email = db.Column(db.Text, unique=True)
     password = db.Column(db.Text)
 ```
@@ -202,7 +201,7 @@ class LoginForm(FlaskForm):
         if user is None:
             raise ValidationError("No account found with that email address.")
 
-    def validate_password(self, password):
+    def validate_password(self, password, email):
         user = user = db.session.execute(
             db.select(User).filter_by(email=email.data)
         ).scalar_one()
@@ -291,7 +290,7 @@ from flask_login import logout_user, login_required
 @login_required
 def logout():
     logout_user()
-    return redirect(url_for('main.index'))
+    return redirect(url_for('index'))
 ```
 
 ### 6. Add login/logout to the navbar
