@@ -1,8 +1,8 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 
 setup(
     name="comp0034-week10",
-    packages=["paralympic_app", "iris_app", "paralympic_dash_app"],
+    packages=find_packages(),
     include_package_data=True,
     install_requires=[
         "flask",
