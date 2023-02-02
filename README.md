@@ -10,4 +10,4 @@ Install the apps e.g. `pip install -e .`
 
 ## Activities
 
-The activities are accessed from the [activities](/activities/) folder.
+The activities are accessed from [activities/activities.md](/activities/activities.md).
