@@ -16,15 +16,15 @@ The general steps to integrate the dashboard as a route in a Flask app are:
 
 1. Create a function that includes the code to create the Dash app;  add the layout and register the callbacks. The function takes a Flask app as a parameter.
 2. Call the new create dash app function in the Flask app `create_app()` function.
-3. Add a link to the Dashboard to the navbar in the Flask app
+3. Add a link to the Dashboard to the navbar in the Flask app.
+
+This activity can be applied to the paralympic app which has the paralympic dash app folder already within it.
 
 ### 1. Create a function that creates the Dash app, layout and callbacks
 
 The Dash app is no longer run as a separate server, it needs to be run taking the Flask server as a parameter and then creating the Dash app as a route on this.
 
 Look in [/paralympic_app/paralympic_dash_app/paralympic_dash_app.py](/paralympic_app/paralympic_dash_app/paralympic_dash_app.py) and you should see that the code to create the app and add the layout has been added to a function `def create_dash_app(flask_app):` that takes as a parameter a runnning Flask app.
-
-There is then a function called `def register_callbacks(dash_app):` that takes the configured dash app from the previous function and registers the callbacks.
 
 You will now run the Dash app from within your Flask code which is in the `paralympic_app/__init__.py` file in the `create_app()` function.
 
