@@ -24,7 +24,7 @@ This activity can be applied to the paralympic app which has the paralympic dash
 
 The Dash app is no longer run as a separate server, it needs to be run taking the Flask server as a parameter and then creating the Dash app as a route on this.
 
-Look in [/paralympic_app/paralympic_dash_app/paralympic_dash_app.py](/paralympic_app/paralympic_dash_app/paralympic_dash_app.py) and you should see that the code to create the app and add the layout has been added to a function `def create_dash_app(flask_app):` that takes as a parameter a runnning Flask app.
+Look in [/paralympic_app/paralympic_dash_app/paralympic_dash_app.py](/paralympic_app/paralympic_dash_app/paralympic_dash_app.py) and you should see that the code to create the app; add the layout and the callbacks has been added to a function `def create_dash_app(flask_app):` that takes as a parameter a runnning Flask app.
 
 You will now run the Dash app from within your Flask code which is in the `paralympic_app/__init__.py` file in the `create_app()` function.
 

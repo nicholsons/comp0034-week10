@@ -2,6 +2,7 @@ from dash import html, dcc, Dash, dash_table, Input, Output
 import dash_bootstrap_components as dbc
 from paralympic_dash_app import create_charts as cc
 
+
 fig_line_sports = cc.line_chart_sports()
 fig_sb_gender_winter = cc.stacked_bar_gender("Winter")
 fig_sb_gender_summer = cc.stacked_bar_gender("Summer")
@@ -11,17 +12,24 @@ df_medals = cc.get_medals_table_data("London", 2012)
 fig_cp_map_medals = cc.choropleth_mapbox_medals(df_medals)
 
 
-def init_dashboard(flask_app):
-    """Create a Plotly Dash dashboard."""
+def create_dash_app(flask_app):
+    """Creates Dash as a route in Flask
+
+    :param flask_app: A confired Flask app
+    :return dash_app: A configured Dash app registered to the Flask app
+    """
+    # Register the Dash app to a route '/dashboard/' on a Flask app
     dash_app = Dash(
         __name__,
-        external_stylesheets=[dbc.themes.BOOTSTRAP],
+        server=flask_app,
+        url_base_pathname="/dashboard/",
         meta_tags=[
             {
                 "name": "viewport",
                 "content": "width=device-width, initial-scale=1",
-            },
+            }
         ],
+        external_stylesheets=[dbc.themes.BOOTSTRAP],
     )
 
     dash_app.layout = dbc.Container(
@@ -54,8 +62,6 @@ def init_dashboard(flask_app):
                     {"label": " Summer", "value": "Summer"},
                 ],
                 value=["Winter", "Summer"],
-                # inputClassName="form-check-input",
-                # labelClassName="form-check-label",
                 labelStyle={"display": "block"},
             ),
             dcc.Graph(
@@ -81,14 +87,6 @@ def init_dashboard(flask_app):
         ],
         fluid=True,
     )
-
-    init_callbacks(dash_app)
-
-    return dash_app.server
-
-
-def init_callbacks(dash_app):
-    """Initialises the callbacks for the Dash app"""
 
     @dash_app.callback(
         Output(component_id="line-sports", component_property="figure"),
@@ -127,3 +125,5 @@ def init_callbacks(dash_app):
         if "Summer" in selected_types:
             sum_show = {"display": "block"}
         return [win_show, sum_show]
+
+    return dash_app
