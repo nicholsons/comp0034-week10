@@ -1,7 +1,4 @@
-from flask import (
-    render_template,
-    current_app as app,
-)
+from flask import render_template, current_app as app, abort
 
 from paralympic_app.utilities import get_event, get_events
 
@@ -17,4 +14,7 @@ def index():
 def display_event(event_id):
     """Returns the event detail page"""
     ev = get_event(event_id)
-    return render_template("event.html", event=ev)
+    if ev:
+        return render_template("event.html", event=ev)
+    else:
+        abort(404)

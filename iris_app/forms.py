@@ -13,7 +13,7 @@ class PredictionForm(FlaskForm):
     petal_width = DecimalField(validators=[DataRequired()])
 
 
-class UserForm(FlaskForm):
+class RegisterForm(FlaskForm):
     """Fields to a form to input the values required for adding a new user account"""
 
     email = EmailField("email", validators=[DataRequired()])

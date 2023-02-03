@@ -77,16 +77,40 @@ def create_app(config_class):
 
 ### 2. Add the required helper functions from UserMixin to the User class
 
-To make implementing a user class easier, you can inherit from `UserMixin`, which provides default implementations for the first four of the above properties and methods (`is_authenticated`, `is_active`, `is_anonymous`, `get_id()`). For example, modify the User class like this:
+To make implementing a user class easier, you can inherit from `UserMixin`, which provides default implementations for the first four of the above properties and methods (`is_authenticated`, `is_active`, `is_anonymous`, `get_id()`). For example, modify the User class like the code below.
+
+**Note:** Make sure the primary key field is called `id` and not anything else or you will find errors with the UserMixin functions when you run your app.
 
 ```python
-from flask_login import UserMixin
-
 class User(UserMixin, db.Model):
+    """Class to represent users who have created a login"""
+
     __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.Text, unique=True)
-    password = db.Column(db.Text)
+    email = db.Column(db.Text, unique=True, nullable=False)
+    password = db.Column(db.Text, nullable=False)
+
+    def __init__(self, email: str, password: str):
+        """
+        Create a new User object hashing the plain text password.
+        """
+        self.email = email
+        self.password = generate_password_hash(password)
+
+    def check_password(self, password):
+        """Check the plain text password matches the hashed password
+
+        :return Boolean:
+        """
+        return check_password_hash(self.password, password)
+
+    def __repr__(self):
+        """
+        Returns the attributes of a User as a string, except for the password
+        :returns str
+        """
+        clsname = self.__class__.__name__
+        return f"{clsname}: <{self.id}, {self.email}>"
 ```
 
 ### 3. User loader
@@ -102,8 +126,7 @@ A cookie is a small piece of data stored on the client's computer. A session's d
 Sessions in Flask are a way to store information about a specific user from one request to the next. They work by storing a cryptographically signed cookie on the users browser and decoding it on every request. The session object can be treated just like a dictionary that persists across requests, making it an ideal place to store non-sensitive user data. The user could look at the contents of your cookie but not modify it, unless they know the secret key used for
 signing.
 
-However, the session object is NOT a secure way to store data. It's a base64 encoded string and can easily be decoded, thus not making it a secure way to save or access sensitive information. An example of decoding the session data is shown at the end of
-this [tutorial by Julian Nash on pythonise.com](https://pythonise.com/series/learning-flask/flask-session-object).
+However, the session object is NOT a secure way to store data. It's a base64 encoded string and can easily be decoded, thus not making it a secure way to save or access sensitive information. An example of decoding the session data is shown at the end of this [tutorial by Julian Nash on pythonise.com](https://pythonise.com/series/learning-flask/flask-session-object).
 
 #### Implement user_loader
 
@@ -138,9 +161,7 @@ Any HTTP parameter can be controlled by the user, and could be abused by attacke
 
 To counter this type of attack URLs must be validated to ensure they are valid pages within your site before being used to redirect the user.
 
-Fortunately there is a Flask code snippets link
-on [Flask-Login (Login Example section)](https://flask-login.readthedocs.io/en/latest/#login-example) for a function to validate `next`. If that URL is broken, go
-to [GitHub flask snippets](https://github.com/fengsp/flask-snippets/blob/master/security/redirect_back.py)
+Fortunately there is a Flask code snippets link on [Flask-Login (Login Example section)](https://flask-login.readthedocs.io/en/latest/#login-example) for a function to validate `next`. If that URL is broken, go to [GitHub flask snippets](https://github.com/fengsp/flask-snippets/blob/master/security/redirect_back.py)
 or [Unvalidated URL redirect](https://security.openstack.org/guidelines/dg_avoid-unvalidated-redirects.html) instead.
 
 You will need to add the code for the functions `is_safe_url` and `get_safe_redirect` to your authentication module.
@@ -178,8 +199,6 @@ Create the Login form class in forms.py. This includes some custom validators to
 ```python
 from flask_wtf import FlaskForm
 from wtforms import (
-    DecimalField,
-    StringField,
     EmailField,
     PasswordField,
     BooleanField,
@@ -193,25 +212,9 @@ class LoginForm(FlaskForm):
     password = PasswordField(label="Password", validators=[DataRequired()])
     remember = BooleanField(label="Remember me")
 
-    def validate_email(self, email):
-        """Check the email exists in the database"""
-        user = db.session.execute(
-            db.select(User).filter_by(email=email.data)
-        ).scalar_one()
-        if user is None:
-            raise ValidationError("No account found with that email address.")
-
-    def validate_password(self, password, email):
-        user = user = db.session.execute(
-            db.select(User).filter_by(email=email.data)
-        ).scalar_one()
-        if user is None:
-            raise ValidationError("No account found with that email address.")
-        if user.password != password.data:
-            raise ValidationError("Incorrect password.")
 ```
 
-Create the `login.html` template:
+Create the `login.html` template. The form has email, password and a remember me checkbox. The following version uses a Jinja macro to generate the fields.
 
 ```jinja
 {% extends 'layout.html' %}
@@ -246,39 +249,61 @@ Create `_loginhelpers.html`:
 
 #### Create the login route
 
-When the login form is submitted and is valid then query the database to find the user.
+When the login form is submitted and is valid then query the database to find the user. For the query syntax refer to [Flask-SQLAlchemy](https://flask-sqlalchemy.palletsprojects.com/en/3.0.x/queries/#queries-for-views).
 
-You can then use the `login_user()` function to login the user.
+You can then use the [Flask-Login `login_user()` function](https://flask-login.readthedocs.io/en/latest/#login-mechanisms) to login the user.
 
 As we have a `remember me` checkbox in the login form then we need to pass additional parameters to login e.g. `login_user(user, remember=form.remember.data, duration=timedelta(minutes=1))`. This is used so that if the user accidentally closes their browser they are not logged out, instead if they re-open the browser within a minute then they will still be logged in.
 
 You then provide function to validate the `next` parameter (i.e. the URL you are going to next). If this isn't safe then the function will abort, otherwise the user will be logged in and redirected to the home page.
 
+Add the following to `routes.py`. This version is longer than the [example in the Flask-Login documentation](https://flask-login.readthedocs.io/en/latest/#login-example). Extra code has been added to handle the case where the email address does not exist or the password is incorrect.
+
+The solution also uses Flask flash messaging to pass the error messages which is documented in a separate activity. You can remove these if you are not using flash messages.
+
 ```python
 from datetime import timedelta
 from flask import abort
 from flask_login import login_user
+from sqlalchemy.exc import NoResultFound
 from iris_app.forms import LoginForm
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=["GET", "POST"])
 def login():
+    """Login the user if the password and email are valid."""
     login_form = LoginForm()
+
     if login_form.validate_on_submit():
-        user = db.session.execute(
-            db.select(User).filter_by(email=login_form.email.data)
-        ).scalar_one()
-        login_user(user, remember=login_form.remember.data, duration=timedelta(minutes=1))
-        next = request.args.get('next')
-        if not is_safe_url(next):
-            return abort(400)
-        return redirect(next or url_for('index'))
-    return render_template('login.html', title='Login', form=login_form)
+        try:
+            # Query if the user exists. If not raise a NoResultFound error and return to the login form
+            user = db.session.execute(
+                db.select(User).filter_by(email=login_form.email.data)
+            ).scalar_one()
+
+            if user and user.check_password(login_form.password.data):
+                # If the user exists and their password is correct, login the user
+                login_user(
+                    user,
+                    remember=login_form.remember.data,
+                    duration=timedelta(minutes=1),
+                )
+                # If they came to login from another page, return them to that page after login, otherwise go to home
+                next = request.args.get("next")
+                if not is_safe_url(next):
+                    return abort(400)
+                return redirect(next or url_for("index"))
+            else:
+                # Message to show if the password was incorrect
+                flash("Incorrect password")
+        except NoResultFound:
+            flash("Email address not found")
+    return render_template("login.html", title="Login", form=login_form)
 ```
 
 #### Create `logout` route
 
-Logout should only occur if a user is logged in, so use the `@login_required` decorator.
+Logout should only occur if a user is logged in, so use the Flask-Login `@login_required` decorator.
 
 Flask-Login provides a `logout_user()` function.
 
@@ -289,6 +314,7 @@ from flask_login import logout_user, login_required
 @app.route('/logout')
 @login_required
 def logout():
+    """ Logs out the user and returns them to the home page"""
     logout_user()
     return redirect(url_for('index'))
 ```
@@ -332,4 +358,4 @@ Try out the following:
 - Close the browser and wait longer than a minute, you should be logged out (login shows in the navbar)
 - Choose Logout from the navbar, you should be logged out (login shows in the navbar)
 
-You have already used the `@login_required` decorator to the logout function. Add this to any other routes that you wish the user to be logged in before they can view it.
+You have already used the `@login_required` decorator to the logout function. Add this to any other routes where you want the user to be logged in before they can view it.

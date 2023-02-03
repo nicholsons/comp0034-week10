@@ -2,7 +2,7 @@ from pathlib import Path
 import pickle
 from flask import render_template, current_app as app, request
 import numpy as np
-from iris_app.forms import PredictionForm, UserForm
+from iris_app.forms import PredictionForm, RegisterForm
 from iris_app import db
 from iris_app.models import Iris, User
 
@@ -92,7 +92,7 @@ def iris_list():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-    form = UserForm()
+    form = RegisterForm()
     if form.validate_on_submit():
         email = request.form.get("email")
         password = request.form.get("password")

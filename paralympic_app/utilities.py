@@ -19,9 +19,16 @@ def get_events():
 
 
 def get_event(event_id):
-    """Function to get a single event as a json structure"""
+    """Function to get a single event as a json structure
+
+    :return Event json or None: Event JSON if event exists, otherwise None"""
+    # Does not use get_or_404() as this is only valid for routes with Views
+    # and the function used in an API route with no view.
     event = db.session.execute(
         db.select(Event).filter_by(event_id=event_id)
-    ).one()
-    result = events_schema.dump(event)
-    return result
+    ).one_or_none()
+    if event:
+        result = events_schema.dump(event)
+        return result
+    else:
+        return event
