@@ -10,9 +10,9 @@ Each activity is in a separate file:
 
 - [Add a Dash app to a Flask route](/activities/add_dash_app.md)
 - [Flask Blueprints](/activities/blueprints.md)
-- [Flask HTTP error handling with custom messages](/activities/custom_errors.md) TODO: get_or_404() not working
+- [Flask HTTP error handling with custom messages](/activities/custom_errors.md)
 - [Flask Flash messaging](/activities/enable_flash_messaging.md)
 - [Flask authentication using Flask-Login](/activities/flask_login.md)
-- [Flask authentication using JWT](/activities/jwt.md) TODO: To be written
+- [Flask authentication using JWT](/activities/jwt.md)
 
 Completed code is available in <https://github.com/nicholsons/comp0034-week10-complete>
