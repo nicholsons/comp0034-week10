@@ -17,7 +17,7 @@ To create the error you need to:
 
 ## Define the error templates
 
-Create these as you do for any other template. You could even use a parent/child inheritcance and have a base error page that is inherited by the specific error pages.
+Create these as you do for any other template. You could even use a parent/child inheritance and have a base error page that is inherited by the specific error pages.
 
 ```jinja
 {% extends "layout_errors.html" %}
@@ -28,7 +28,7 @@ Create these as you do for any other template. You could even use a parent/child
 {% endblock %}
 ```
 
-Add the templates above to the paralympic app templates folder.
+Add the templates above to the iris app templates folder.
 
 ## Define and register the error handlers on the app
 
@@ -38,9 +38,6 @@ To define them for the whole app, add them to the create_app() function:
 
 ```python
 from flask import Flask, render_template
-
-def internal_server_error(e):
-  return render_template('500.html'), 500
 
 
 def internal_server_error(e):
@@ -70,6 +67,6 @@ def page_not_found(error):
     return render_template("404.html"), 404
 ```
 
-Unless you have completed the Bluerint activity, then add the 404 and 500 error handlers to the `__init__.py` and `create_app()`.
+Unless you have completed the Blueprint activity and applied it to the iris app, then add the 404 and 500 error handlers to the `__init__.py` and `create_app()`.
 
 Run the app and request a page that does not exist e.g. <http://127.0.0.1:5000/display_event/99>
