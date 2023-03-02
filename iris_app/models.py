@@ -30,11 +30,12 @@ class User(db.Model):
     email = db.Column(db.Text, unique=True, nullable=False)
     password = db.Column(db.Text, nullable=False)
 
-    def __init__(self, email: str, password: str):
+    def __init__(self, **kwargs):
         """
         Create a new User object hashing the plain text password.
         """
-        self.email = email
+        super().__init__(**kwargs)
+        password = kwargs["password"]
         self.password = generate_password_hash(password)
 
     def check_password(self, password):
